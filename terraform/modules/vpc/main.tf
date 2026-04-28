@@ -1,3 +1,24 @@
+resource "aws_vpc" "this" {
+  cidr_block           = var.cidr_block
+  enable_dns_hostnames = true
+
+  tags = {
+    Name = var.name
+  }
+}
+
+
+
+
+
+
+
+
+# 1. provider 설정
+provider "aws" {
+	region = "ap-northeast-2" # 서울 리전  
+}
+
 # vpc
 resource "aws_vpc" "proejct01_vpc" {
 	cidr_block 				= "10.0.0.0/16"
