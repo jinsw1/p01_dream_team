@@ -12,7 +12,7 @@ override.tf.json
 *_override.tf.json
 
 # Terraform CLI config
-.terraform.lock.hcl
+#.terraform.lock.hcl
 
 # Plan files (절대 커밋 금지)
 *.tfplan

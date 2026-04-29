@@ -42,7 +42,7 @@ module "private_subnet_was" {
 
 # private db 서브넷 생성
 module "private_subnet_db" {
-	source = "./modules/subnet"	
+	source = "./modules/subnet"
 }
 
 # private db 서브넷 생성
