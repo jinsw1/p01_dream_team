@@ -1,3 +1,6 @@
+# modules/vpc/outputs.tf
+
 output "vpc_id" {
-  value = aws_vpc.this.id
+  description = "생성된 VPC의 ID"
+  value       = aws_vpc.this.id
 }
