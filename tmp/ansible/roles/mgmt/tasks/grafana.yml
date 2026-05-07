@@ -1,0 +1,65 @@
+- name: 필수 패키지 설치 (RedHat 계열)
+  when: ansible_facts['os_family'] == "RedHat"
+  ansible.builtin.dnf:
+    name:
+      - wget
+    state: present
+
+- name: Grafana YUM 저장소 등록 (RedHat 계열)
+  when: ansible_facts['os_family'] == "RedHat"
+  ansible.builtin.copy:
+    dest: /etc/yum.repos.d/grafana.repo
+    content: |
+      [grafana]
+      name=grafana
+      baseurl=https://rpm.grafana.com
+      enabled=1
+      gpgcheck=1
+      repo_gpgcheck=0
+      gpgkey=https://rpm.grafana.com/gpg.key
+      sslverify=1
+      sslcacert=/etc/pki/tls/certs/ca-bundle.crt
+
+- name: Grafana 설치 (RedHat 계열)
+  when: ansible_facts['os_family'] == "RedHat"
+  ansible.builtin.dnf:
+    name: grafana
+    state: present
+    update_cache: no
+
+- name: 필수 패키지 설치 (Debian 계열)
+  when: ansible_facts['os_family'] == "Debian"
+  ansible.builtin.apt:
+    name:
+      - apt-transport-https
+      - wget
+      - gnupg
+    state: present
+    update_cache: yes
+
+- name: Grafana GPG 키 다운로드 (Debian 계열)
+  when: ansible_facts['os_family'] == "Debian"
+  ansible.builtin.get_url:
+    url: https://packages.grafana.com/gpg.key
+    dest: /usr/share/keyrings/grafana.key
+    mode: '0644'
+
+- name: Grafana APT 저장소 추가 (Debian 계열)
+  when: ansible_facts['os_family'] == "Debian"
+  ansible.builtin.apt_repository:
+    repo: "deb [signed-by=/usr/share/keyrings/grafana.key] https://packages.grafana.com/oss/deb stable main"
+    state: present
+    filename: grafana
+
+- name: Grafana 설치 (Debian 계열)
+  when: ansible_facts['os_family'] == "Debian"
+  ansible.builtin.apt:
+    name: grafana
+    state: present
+    update_cache: yes
+
+- name: Grafana 서비스 시작 및 활성화
+  ansible.builtin.systemd:
+    name: grafana-server
+    state: started
+    enabled: yes

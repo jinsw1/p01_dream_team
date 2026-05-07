@@ -1,0 +1,17 @@
+---
+- name: "폴더 생성"
+  file:
+    path: /home/ec2-user/fastapi
+    state: directory
+    mode: '0755'
+
+- name: "venv 설치"
+  command: python3 -m venv /home/ec2-user/venv
+  args:
+    creates: /home/ec2-user/venv/bin/activate
+
+- name: "pip upgrade"
+  command: /home/ec2-user/venv/bin/python3 -m pip install --upgrade pip
+
+- name: "fastapi, uvicorn설치"
+  command: /home/ec2-user/venv/bin/pip install fastapi uvicorn

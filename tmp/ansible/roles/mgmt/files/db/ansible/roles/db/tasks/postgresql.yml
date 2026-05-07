@@ -1,0 +1,15 @@
+---
+- name: "postgresql 필수 패키지 설치"
+  dnf:
+    name:
+      - postgresql-server
+      - postgresql-contrib
+      - python3-psycopg2
+    state: present
+
+- name: "db 초기화"
+  command: postgresql-setup --initdb
+  args:
+    creates: "{{ pg_data_dir }}/PG_VERSION"
+  
+- name: "외부 접속 허용"
