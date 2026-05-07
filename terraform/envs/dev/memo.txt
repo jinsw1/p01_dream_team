@@ -1,0 +1,18 @@
+1. Data (AZ 등)
+2. Network (VPC, IGW, Subnet)
+3. Routing (Route Table, Association, NAT)
+4. Security Group
+5. Compute (EC2)
+6. Load Balancer (ALB)
+
+
+→ VPC → Subnet → Routing → SG → EC2 → ALB
+
+
+네트워크 문제
+보안 그룹 문제
+EC2 문제
+ALB 문제
+
+# Terraform은 실행 순서는 중요하지 않지만, “Layer 기준으로 정
+
