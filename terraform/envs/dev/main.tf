@@ -135,7 +135,6 @@ resource "aws_route_table" "project01_private_rt" {
 ############################################
 # 4. SECURITY GROUP (방화벽 역할)
 ############################################
-
 # Bastion SG
 # → 외부에서 SSH 접속 허용 (관리용)
 module "project01_bastion_sg" {
