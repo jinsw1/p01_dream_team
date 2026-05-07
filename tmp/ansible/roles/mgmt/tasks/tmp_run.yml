@@ -1,0 +1,10 @@
+---
+- name: "작업 디렉토리 캐시 제거"
+  file:
+    path: "{{ was_terraform_dir }}/.terraform"
+    state: absent
+
+- name: "tmp비우기"
+  become: yes
+  shell: rm -rf /tmp/*
+  changed_when: false
