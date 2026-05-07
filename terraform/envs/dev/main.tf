@@ -135,6 +135,7 @@ resource "aws_route_table" "project01_private_rt" {
 ############################################
 # 4. SECURITY GROUP (방화벽 역할)
 ############################################
+
 # Bastion SG
 # → 외부에서 SSH 접속 허용 (관리용)
 module "project01_bastion_sg" {
@@ -151,6 +152,15 @@ module "project01_bastion_sg" {
       description = "관리자 SSH 접근"
     }
   ]
+  egress_rules = [
+    {
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      cidr_blocks = ["0.0.0.0/0"]
+	  description = null
+    }
+  ]  
 }
 
 # WAS SG
@@ -177,6 +187,15 @@ module "project01_was_sg" {
       description     = "ALB → WAS HTTP"
     }
   ]
+  egress_rules = [
+    {
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      cidr_blocks = ["0.0.0.0/0"]
+	  description = null
+    }
+  ]  
 }
 
 # DB SG
@@ -195,6 +214,15 @@ module "project01_db_sg" {
       description     = "WAS → DB 접근"
     }
   ]
+  egress_rules = [
+    {
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      cidr_blocks = ["0.0.0.0/0"]
+	  description = null
+    }
+  ]  
 }
 
 ############################################
@@ -205,24 +233,33 @@ module "project01_db_sg" {
 # → 운영자가 SSH로 접속하는 유일한 entry point
 module "project01_bastion_ec2" {
   source = "../../modules/ec2"
-  subnet_id          = module.project01_public_subnet_bastion.subnet_id
+  instance_type      = "t3.micro"
+  subnet_id          = module.project01_public_subnet_bastion.subnet_id  
   security_group_ids = [module.project01_bastion_sg.sg_id]
+  key_name           = "project01-key-mgmt"
+  name               = "project01_bastion_ec2"
 }
 
 # WAS Server
 # → 실제 애플리케이션 실행 서버
 module "project01_was01_ec2" {
   source = "../../modules/ec2"
-  subnet_id          = module.project01_private_subnet_was.subnet_id
+  instance_type      = "t3.micro"
+  subnet_id          = module.project01_private_subnet_was.subnet_id  
   security_group_ids = [module.project01_was_sg.sg_id]
+  key_name           = "project01-key-was"
+  name               = "project01-was01-ec2"
 }
 
 # DB Server
 # → 데이터 저장 전용 서버
 module "project01_db_ec2" {
   source = "../../modules/ec2"
-  subnet_id          = module.project01_private_subnet_db.subnet_id
+  instance_type      = "t3.micro"
+  subnet_id          = module.project01_private_subnet_db.subnet_id  
   security_group_ids = [module.project01_db_sg.sg_id]
+  key_name           = "project01-key-was"
+  name               = "project01_db_ec2"
 }
 
 ############################################
@@ -252,6 +289,15 @@ module "project01_alb_sg" {
       description = "HTTPS 외부 트래픽"
     }
   ]
+  egress_rules = [
+    {
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      cidr_blocks = ["0.0.0.0/0"]
+	  description = null
+    }
+  ]  
 }
 
 # ALB
