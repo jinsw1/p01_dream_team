@@ -22,63 +22,63 @@ module "project01_vpc" {
 # Internet Gateway 생성
 # → VPC 내부에서 인터넷으로 나가는 출구 역할
 module "igw" {
-  source  = "../../modules/internet-gateway"
-  vpc_id  = module.project01_vpc.vpc_id
-  name    = "project01-igw"
+  source = "../../modules/internet-gateway"
+  vpc_id = module.project01_vpc.vpc_id
+  name   = "project01-igw"
 }
 
 # Bastion Subnet (Public)
 # → 관리자 접속용 서버가 위치하는 퍼블릭 서브넷
 module "project01_public_subnet_bastion" {
-  source         = "../../modules/subnet"
-  vpc_id         = module.project01_vpc.vpc_id
-  cidr_block     = "10.0.1.0/24"
-  az             = data.aws_availability_zones.available.names[0]
-  map_public_ip  = true
-  name           = "project01-public-subnet-bastion"
+  source        = "../../modules/subnet"
+  vpc_id        = module.project01_vpc.vpc_id
+  cidr_block    = "10.0.1.0/24"
+  az            = data.aws_availability_zones.available.names[0]
+  map_public_ip = true
+  name          = "project01-public-subnet-bastion"
 }
 
 # ALB Public Subnet (A/B)
 # → 로드밸런서가 외부 요청을 받는 퍼블릭 서브넷
 # → AZ 분산으로 장애 대비 (HA 구성)
 module "project01_public_subnet_alb_a" {
-  source         = "../../modules/subnet"
-  vpc_id         = module.project01_vpc.vpc_id
-  cidr_block     = "10.0.2.0/24"
-  az             = data.aws_availability_zones.available.names[0]
-  map_public_ip  = true
-  name           = "project01-public-subnet-alb-a"
+  source        = "../../modules/subnet"
+  vpc_id        = module.project01_vpc.vpc_id
+  cidr_block    = "10.0.2.0/24"
+  az            = data.aws_availability_zones.available.names[0]
+  map_public_ip = true
+  name          = "project01-public-subnet-alb-a"
 }
 
 module "project01_public_subnet_alb_b" {
-  source         = "../../modules/subnet"
-  vpc_id         = module.project01_vpc.vpc_id
-  cidr_block     = "10.0.3.0/24"
-  az             = data.aws_availability_zones.available.names[1]
-  map_public_ip  = true
-  name           = "project01-public-subnet-alb-b"
+  source        = "../../modules/subnet"
+  vpc_id        = module.project01_vpc.vpc_id
+  cidr_block    = "10.0.3.0/24"
+  az            = data.aws_availability_zones.available.names[1]
+  map_public_ip = true
+  name          = "project01-public-subnet-alb-b"
 }
 
 # WAS Private Subnet
 # → 실제 애플리케이션 서버가 위치 (외부 직접 접근 불가)
 module "project01_private_subnet_was" {
-  source         = "../../modules/subnet"
-  vpc_id         = module.project01_vpc.vpc_id
-  cidr_block     = "10.0.10.0/24"
-  az             = data.aws_availability_zones.available.names[0]
-  map_public_ip  = false
-  name           = "project01-private-subnet-was"
+  source        = "../../modules/subnet"
+  vpc_id        = module.project01_vpc.vpc_id
+  cidr_block    = "10.0.10.0/24"
+  az            = data.aws_availability_zones.available.names[0]
+  map_public_ip = false
+  name          = "project01-private-subnet-was"
 }
 
 # DB Private Subnet
 # → 데이터베이스 전용 (외부 완전 차단)
 module "project01_private_subnet_db" {
-  source         = "../../modules/subnet"
-  vpc_id         = module.project01_vpc.vpc_id
-  cidr_block     = "10.0.30.0/24"
-  az             = data.aws_availability_zones.available.names[0]
-  map_public_ip  = false
-  name           = "project01-private-subnet-db"
+  source        = "../../modules/subnet"
+  vpc_id        = module.project01_vpc.vpc_id
+  cidr_block    = "10.0.30.0/24"
+  az            = data.aws_availability_zones.available.names[0]
+  map_public_ip = false
+  name          = "project01-private-subnet-db"
 }
 
 ############################################
@@ -149,7 +149,7 @@ module "project01_bastion_sg" {
       to_port     = 22
       protocol    = "tcp"
       cidr_blocks = ["0.0.0.0/0"]
-      description = "관리자 SSH 접근"
+      description = "Admin SSH Access"
     }
   ]
   egress_rules = [
@@ -158,9 +158,9 @@ module "project01_bastion_sg" {
       to_port     = 0
       protocol    = "-1"
       cidr_blocks = ["0.0.0.0/0"]
-	  description = null
+      description = null
     }
-  ]  
+  ]
 }
 
 # WAS SG
@@ -177,14 +177,14 @@ module "project01_was_sg" {
       to_port         = 22
       protocol        = "tcp"
       security_groups = [module.project01_bastion_sg.sg_id]
-      description     = "Bastion에서 SSH"
+      description     = "Bastion to SSH Access"
     },
     {
       from_port       = 80
       to_port         = 80
       protocol        = "tcp"
       security_groups = [module.project01_alb_sg.sg_id]
-      description     = "ALB → WAS HTTP"
+      description     = "ALB to WAS HTTP Access"
     }
   ]
   egress_rules = [
@@ -193,9 +193,9 @@ module "project01_was_sg" {
       to_port     = 0
       protocol    = "-1"
       cidr_blocks = ["0.0.0.0/0"]
-	  description = null
+      description = null
     }
-  ]  
+  ]
 }
 
 # DB SG
@@ -211,7 +211,7 @@ module "project01_db_sg" {
       to_port         = 5432
       protocol        = "tcp"
       security_groups = [module.project01_was_sg.sg_id]
-      description     = "WAS → DB 접근"
+      description     = "WAS to DB Access"
     }
   ]
   egress_rules = [
@@ -220,45 +220,64 @@ module "project01_db_sg" {
       to_port     = 0
       protocol    = "-1"
       cidr_blocks = ["0.0.0.0/0"]
-	  description = null
+      description = null
     }
-  ]  
+  ]
 }
 
 ############################################
 # 5. COMPUTE (EC2)
 ############################################
 
+module "project01_bastion_ec2_key" {
+  source   = "../../modules/keypair"
+  key_name = "project01-bastion-key"
+}
+
+
+module "project01_was_ec2_key" {
+  source   = "../../modules/keypair"
+  key_name = "project01-was-key"
+}
+
+
+module "project01_db_ec2_key" {
+  source   = "../../modules/keypair"
+  key_name = "project01-db-key"
+}
+
+
+
 # Bastion Server
 # → 운영자가 SSH로 접속하는 유일한 entry point
 module "project01_bastion_ec2" {
-  source = "../../modules/ec2"
+  source             = "../../modules/ec2"
   instance_type      = "t3.micro"
-  subnet_id          = module.project01_public_subnet_bastion.subnet_id  
+  subnet_id          = module.project01_public_subnet_bastion.subnet_id
   security_group_ids = [module.project01_bastion_sg.sg_id]
-  key_name           = "project01-key-mgmt"
+  key_name           = "${module.project01_bastion_ec2_key.key_name}"
   name               = "project01_bastion_ec2"
 }
 
 # WAS Server
 # → 실제 애플리케이션 실행 서버
 module "project01_was01_ec2" {
-  source = "../../modules/ec2"
+  source             = "../../modules/ec2"
   instance_type      = "t3.micro"
-  subnet_id          = module.project01_private_subnet_was.subnet_id  
+  subnet_id          = module.project01_private_subnet_was.subnet_id
   security_group_ids = [module.project01_was_sg.sg_id]
-  key_name           = "project01-key-was"
+  key_name           = "${module.project01_was_ec2_key.key_name}"
   name               = "project01-was01-ec2"
 }
 
 # DB Server
 # → 데이터 저장 전용 서버
 module "project01_db_ec2" {
-  source = "../../modules/ec2"
+  source             = "../../modules/ec2"
   instance_type      = "t3.micro"
-  subnet_id          = module.project01_private_subnet_db.subnet_id  
+  subnet_id          = module.project01_private_subnet_db.subnet_id
   security_group_ids = [module.project01_db_sg.sg_id]
-  key_name           = "project01-key-was"
+  key_name           = "${module.project01_db_ec2_key.key_name}"
   name               = "project01_db_ec2"
 }
 
@@ -279,14 +298,14 @@ module "project01_alb_sg" {
       to_port     = 80
       protocol    = "tcp"
       cidr_blocks = ["0.0.0.0/0"]
-      description = "HTTP 외부 트래픽"
+      description = "HTTP External Traffic"
     },
     {
       from_port   = 443
       to_port     = 443
       protocol    = "tcp"
       cidr_blocks = ["0.0.0.0/0"]
-      description = "HTTPS 외부 트래픽"
+      description = "HTTPS External Traffic"
     }
   ]
   egress_rules = [
@@ -295,9 +314,9 @@ module "project01_alb_sg" {
       to_port     = 0
       protocol    = "-1"
       cidr_blocks = ["0.0.0.0/0"]
-	  description = null
+      description = null
     }
-  ]  
+  ]
 }
 
 # ALB
@@ -306,8 +325,8 @@ module "project01_alb_sg" {
 module "project01_alb" {
   source = "../../modules/alb"
 
-  name               = "project01-alb"
-  vpc_id             = module.project01_vpc.vpc_id
+  name   = "project01-alb"
+  vpc_id = module.project01_vpc.vpc_id
 
   subnet_ids = [
     module.project01_public_subnet_alb_a.subnet_id,
@@ -319,4 +338,43 @@ module "project01_alb" {
   target_instance_ids = {
     was = module.project01_was01_ec2.instance_id
   }
+}
+
+
+
+############################################
+# 7. Ansible - inventory.yml 생성
+############################################
+resource "local_file" "ansible_inventory" {
+
+  #filename = "${path.module}/inventory.yml"
+  filename = "../../../ansible/inventory.yml"
+
+  content = yamlencode({
+    all = {
+      children = {
+
+        bastion = {
+          hosts = {
+            "${module.project01_bastion_ec2.public_ip}" = {
+              ansible_user                 = "ec2-user"
+              ansible_ssh_private_key_file = "${path.module}/${module.project01_was_ec2_key.key_name}.pem"
+            }
+          }
+        }
+
+        was = {
+          hosts = {
+            "${module.project01_was01_ec2.private_ip}" = {
+              ansible_user                 = "ec2-user"
+              ansible_ssh_private_key_file = "${path.module}/project01-key-was.pem"
+
+              # Bastion 경유 SSH 접속
+              ansible_ssh_common_args = "-o ProxyCommand='ssh -W %h:%p -i ${path.module}/project01-key-mgmt.pem ec2-user@${module.project01_bastion_ec2.public_ip}'"
+            }
+          }
+        }
+      }
+    }
+  })
 }
