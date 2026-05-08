@@ -345,6 +345,7 @@ module "project01_alb" {
 ############################################
 # 7. Ansible - inventory.yml 생성
 ############################################
+/*
 resource "local_file" "ansible_inventory" {
 
   #filename = "${path.module}/inventory.yml"
@@ -378,3 +379,4 @@ resource "local_file" "ansible_inventory" {
     }
   })
 }
+*/
