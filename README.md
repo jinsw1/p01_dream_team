@@ -27,6 +27,8 @@
 	    > cd /mnt/c/
 		> cd /mnt/d/
 
+	  8. vscode 작업시 -> connect to WSL
+
 	  ** github의 자원은 /home/user/project01/ 하위에 위치 권장 **
 	  ** 강의자료 참고하여 Ubuntu 용으로 (Terrafom / Ansible / AWS CLI 및 Access-key 등록) **
 
