@@ -13,6 +13,7 @@ resource "aws_key_pair" "this" {
 # 3. Private Key 파일 로컬 저장 (중요)
 resource "local_file" "private_key" {
   content         = tls_private_key.this.private_key_pem
-  filename        = "${path.module}/${var.key_name}.pem"
+  #filename       = "${path.module}/${var.key_name}.pem"
+  filename        = pathexpand("~/.ssh/${var.key_name}.pem")
   file_permission = "0400"
 }

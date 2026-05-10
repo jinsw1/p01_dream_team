@@ -1,0 +1,11 @@
+- name: Base setup for WAS
+  hosts: was
+  become: yes
+  roles:
+    - nginx_setup
+
+- name: Monitoring setup
+  hosts: was
+  become: yes
+  roles:
+    - prometheus_setup
