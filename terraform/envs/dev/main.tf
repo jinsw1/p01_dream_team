@@ -107,6 +107,16 @@ resource "aws_route_table_association" "bastion_rt" {
   route_table_id = aws_route_table.project01_public_rt.id
 }
 
+resource "aws_route_table_association" "alb_a_rt" {
+  subnet_id      = module.project01_public_subnet_alb_a.subnet_id
+  route_table_id = aws_route_table.project01_public_rt.id
+}
+
+resource "aws_route_table_association" "alb_b_rt" {
+  subnet_id      = module.project01_public_subnet_alb_b.subnet_id
+  route_table_id = aws_route_table.project01_public_rt.id
+}
+
 # NAT Gateway
 # → Private subnet이 인터넷 outbound 가능하도록 중계 역할
 module "project01_ngw" {
@@ -130,6 +140,20 @@ resource "aws_route_table" "project01_private_rt" {
   tags = {
     Name = "project01-private-rt"
   }
+}
+
+# private Subnet 연결
+# → 해당 subnet을 인터넷 가능한 라우팅 테이블에 연결
+resource "aws_route_table_association" "was_rt" {
+  subnet_id      = module.project01_private_subnet_was.subnet_id
+  route_table_id = aws_route_table.project01_private_rt.id
+}
+
+# private Subnet 연결
+# → 해당 subnet을 인터넷 가능한 라우팅 테이블에 연결
+resource "aws_route_table_association" "db_rt" {
+  subnet_id      = module.project01_private_subnet_db.subnet_id
+  route_table_id = aws_route_table.project01_private_rt.id
 }
 
 ############################################
@@ -207,6 +231,13 @@ module "project01_db_sg" {
 
   ingress_rules = [
     {
+      from_port       = 22
+      to_port         = 22
+      protocol        = "tcp"
+      security_groups = [module.project01_bastion_sg.sg_id]
+      description     = "Bastion to DB SSH Access"
+    },	
+    {
       from_port       = 5432
       to_port         = 5432
       protocol        = "tcp"
@@ -255,7 +286,7 @@ module "project01_bastion_ec2" {
   instance_type      = "t3.micro"
   subnet_id          = module.project01_public_subnet_bastion.subnet_id
   security_group_ids = [module.project01_bastion_sg.sg_id]
-  key_name           = "${module.project01_bastion_ec2_key.key_name}"
+  key_name           = module.project01_bastion_ec2_key.key_name
   name               = "project01_bastion_ec2"
 }
 
@@ -266,7 +297,7 @@ module "project01_was01_ec2" {
   instance_type      = "t3.micro"
   subnet_id          = module.project01_private_subnet_was.subnet_id
   security_group_ids = [module.project01_was_sg.sg_id]
-  key_name           = "${module.project01_was_ec2_key.key_name}"
+  key_name           = module.project01_was_ec2_key.key_name
   name               = "project01-was01-ec2"
 }
 
@@ -277,7 +308,7 @@ module "project01_db_ec2" {
   instance_type      = "t3.micro"
   subnet_id          = module.project01_private_subnet_db.subnet_id
   security_group_ids = [module.project01_db_sg.sg_id]
-  key_name           = "${module.project01_db_ec2_key.key_name}"
+  key_name           = module.project01_db_ec2_key.key_name
   name               = "project01_db_ec2"
 }
 
@@ -345,6 +376,78 @@ module "project01_alb" {
 ############################################
 # 7. Ansible - inventory.yml 생성
 ############################################
+resource "local_file" "ansible_inventory" {
+
+  filename = "${path.root}/../../../ansible/inventories/dev/inventory.yml"
+
+  content = yamlencode({
+    all = {
+      children = {
+
+        bastion = {
+          hosts = {
+            bastion01 = {}
+          }
+        }
+
+        was = {
+          hosts = {
+            was01 = {}
+          }
+        }
+
+        db = {
+          hosts = {
+            db01 = {}
+          }
+        }
+      }
+    }
+  })
+
+  depends_on = [
+    module.project01_bastion_ec2,
+    module.project01_was01_ec2,
+    module.project01_db_ec2
+  ]
+}
+
+############################################
+# 8. SSH Config 생성
+############################################
+resource "local_file" "ssh_config" {
+
+  filename = pathexpand("~/.ssh/config")
+
+  content = <<EOT
+Host bastion01
+    HostName ${module.project01_bastion_ec2.public_ip}
+    User ec2-user
+    IdentityFile ~/.ssh/project01-bastion-key.pem
+    StrictHostKeyChecking no
+
+Host was01
+    HostName ${module.project01_was01_ec2.private_ip}
+    User ec2-user
+    IdentityFile ~/.ssh/project01-was-key.pem
+    ProxyJump bastion01
+    StrictHostKeyChecking no
+
+Host db01
+    HostName ${module.project01_db_ec2.private_ip}
+    User ec2-user
+    IdentityFile ~/.ssh/project01-db-key.pem
+    ProxyJump bastion01
+    StrictHostKeyChecking no
+EOT
+
+  depends_on = [
+    module.project01_bastion_ec2,
+    module.project01_was01_ec2,
+    module.project01_db_ec2
+  ]
+}
+
 /*
 resource "local_file" "ansible_inventory" {
 
