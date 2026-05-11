@@ -1,4 +1,0 @@
-- name: "ansible 설치"
-  dnf:
-    name: ansible
-    state: present

@@ -1,0 +1,15 @@
+---
+- name: "dnf cache clean"
+  become: yes
+  command: dnf clean all
+  changed_when: false
+
+- name: "system tmp clean"
+  become: yes
+  command: systemd-tmpfiles --clean
+  changed_when: false
+
+- name: "journal log vacuum"
+  become: yes
+  command: journalctl --vacuum-size=50M
+  changed_when: false

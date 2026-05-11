@@ -1,5 +1,0 @@
-- name: remove swap after install
-  ansible.builtin.shell: |
-    swapoff /swapfile
-    rm -f /swapfile
-  become: yes

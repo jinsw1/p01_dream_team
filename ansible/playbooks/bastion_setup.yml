@@ -1,0 +1,7 @@
+---
+- name: "bastion setup"
+  hosts: bastion
+  become: yes
+
+  roles:
+    - bastion_setup
