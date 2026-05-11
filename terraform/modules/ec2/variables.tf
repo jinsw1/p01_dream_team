@@ -17,3 +17,8 @@ variable "key_name" {
 variable "name" {
   type = string
 }
+
+variable "root_volume_size" {
+  type    = number
+  default = 8
+}

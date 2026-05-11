@@ -1,0 +1,16 @@
+# version.tf 
+	- version 명시하기		
+		terraform {}
+
+# provider.tf	
+	- provider 설정
+		provider "aws" {}
+
+# s3 버킷 및 IAM 설정 (새로 추가할 로직)
+	resource "random_id" "bucket_suffix" {}
+
+# main.tf
+	- s3 버킷 정의하기
+		resource "aws_s3_bucket" "db_backup_bucket" {}
+
+		
