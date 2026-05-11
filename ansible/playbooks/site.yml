@@ -1,11 +1,5 @@
-- name: Base setup for WAS
-  hosts: was
-  become: yes
-  roles:
-    - nginx_setup
-
-- name: Monitoring setup
-  hosts: was
-  become: yes
-  roles:
-    - prometheus_setup
+---
+- import_playbook: bootstrap.yml
+- import_playbook: bastion_setup.yml
+- import_playbook: was_setup.yml
+- import_playbook: db_setup.yml

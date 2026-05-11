@@ -1,0 +1,31 @@
+- name: "필수 패키지 설치"
+  ansible.builtin.dnf:
+    name:
+      - wget
+    state: present
+
+- name: "Grafana YUM 저장소 등록"
+  ansible.builtin.copy:
+    dest: /etc/yum.repos.d/grafana.repo
+    content: |
+      [grafana]
+      name=grafana
+      baseurl=https://rpm.grafana.com
+      enabled=1
+      gpgcheck=1
+      repo_gpgcheck=0
+      gpgkey=https://rpm.grafana.com/gpg.key
+      sslverify=1
+      sslcacert=/etc/pki/tls/certs/ca-bundle.crt
+
+- name: "Grafana 설치"
+  ansible.builtin.dnf:
+    name: grafana
+    state: present
+    update_cache: no
+
+- name: Grafana 서비스 시작 및 활성화
+  ansible.builtin.systemd:
+    name: grafana-server
+    state: started
+    enabled: yes

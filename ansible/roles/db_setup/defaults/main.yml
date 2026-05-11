@@ -1,0 +1,6 @@
+db_name: "admin_db"
+db_user: "admin"
+db_pass: "pdmin"
+pg_data_dir: "/var/lib/pgsql/data" 
+pg_hba_path: "{{ pg_data_dir }}/pg_hba.conf"
+pg_conf_path: "{{ pg_data_dir }}/postgresql.conf"
