@@ -1,0 +1,7 @@
+---
+- name: "db setup"
+  hosts: db
+  become: yes
+
+  roles:
+    - db_setup

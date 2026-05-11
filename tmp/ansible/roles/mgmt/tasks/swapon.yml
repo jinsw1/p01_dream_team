@@ -1,8 +1,0 @@
-- name: create swap
-  ansible.builtin.shell: |
-    fallocate -l 1G /swapfile
-    chmod 600 /swapfile
-    mkswap /swapfile
-    swapon /swapfile
-  become: yes
-  ignore_errors: yes

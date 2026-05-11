@@ -1,0 +1,7 @@
+---
+- name: "was setup"
+  hosts: was
+  become: yes
+
+  roles:
+    - was_setup
