@@ -1,5 +1,4 @@
 ---
-- import_tasks: key_jump.yml
 - import_tasks: prometheus.yml
 - import_tasks: grafana.yml
 - import_tasks: cleans.yml
