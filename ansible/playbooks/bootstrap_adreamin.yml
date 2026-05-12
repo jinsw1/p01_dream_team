@@ -1,0 +1,7 @@
+---
+- name: "bootstrap_adreamin"
+  hosts: all
+  become: yes
+
+  roles:
+    - bootstrap_adreamin
