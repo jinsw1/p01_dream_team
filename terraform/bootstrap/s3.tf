@@ -1,9 +1,13 @@
+resource "random_id" "bucket_suffix" {
+    # 8 byte 크기의 렌덤한 문자열을 얻어내기 위한 설정
+    byte_length = 8
+}
+
 resource "aws_s3_bucket" "tfstate" {
-  bucket = "project01-tfstate-bucket"
+  bucket = "project01-tfstate-bucket-${random_id.bucket_suffix.hex}"
 
   # 실수 방지 (삭제 방지)
   force_destroy = false
-
   tags = {
     Name = "project01-tfstate"
   }
