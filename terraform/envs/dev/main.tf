@@ -302,6 +302,7 @@ module "project01_bastion_ec2" {
   security_group_ids = [module.project01_bastion_sg.sg_id]
   key_name           = module.project01_bastion_ec2_key.key_name
   name               = "project01_bastion_ec2"
+  tags               = { Role = "Bastion" }
 
   root_volume_size = 8
 }
@@ -315,6 +316,7 @@ module "project01_was01_ec2" {
   security_group_ids = [module.project01_was_sg.sg_id]
   key_name           = module.project01_was_ec2_key.key_name
   name               = "project01-was01-ec2"
+  tags               = { Role = "WAS" }
 
   root_volume_size = 8
 }
@@ -328,6 +330,7 @@ module "project01_db_ec2" {
   security_group_ids = [module.project01_db_sg.sg_id]
   key_name           = module.project01_db_ec2_key.key_name
   name               = "project01_db_ec2"
+  tags               = { Role = "DB" }
 
   root_volume_size = 8
 }

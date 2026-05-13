@@ -1,0 +1,7 @@
+내 로컬 환경에서 BASTION에 빨대 꼽아서(ssh 연결) 프로메테우스, 그라파나 GUI 접속
+http://localhost:9090 (prometheus)
+http://localhost:3000 (grafana)
+
+그러려면 bastion key를 로컬의 .ssh에 저장해야함
+
+ssh -i "C:\Users\user\.ssh\project01-bastion-key.pem" -L 9090:127.0.0.1:9090 -L 3000:127.0.0.1:3000 ec2-user@"bastion public ip"

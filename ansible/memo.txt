@@ -1,0 +1,18 @@
+bastion_setup 플레이북 실행시 발생되는 rc 오류 해결법
+
+bastion에 ssh 접속 후
+
+# 1. 2GB 크기의 스왑 파일 생성
+sudo dd if=/dev/zero of=/swapfile bs=128M count=16
+
+# 2. 파일 권한 설정 (보안)
+sudo chmod 600 /swapfile
+
+# 3. 스왑 영역으로 설정
+sudo mkswap /swapfile
+
+# 4. 스왑 활성화
+sudo swapon /swapfile
+
+# 5. 메모리 상태 확인 (Swap 항목에 숫자가 보이면 성공!)
+free -h

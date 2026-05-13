@@ -22,3 +22,9 @@ variable "root_volume_size" {
   type    = number
   default = 8
 }
+
+variable "tags" {
+  description = "어떤 EC2(bastion,was,db)인지 알기 위해 인스턴스에 추가할 태그"
+  type        = map(string)
+  default     = {}
+}

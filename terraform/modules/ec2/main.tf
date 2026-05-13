@@ -20,7 +20,10 @@ resource "aws_instance" "this" {
     volume_type = "gp3"
   }
 
-  tags = {
-    Name = var.name
-  }
+  tags = merge(
+    {
+      Name = var.name
+    },
+    var.tags
+  )
 }

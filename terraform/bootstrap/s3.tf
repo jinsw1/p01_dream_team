@@ -1,5 +1,5 @@
 resource "aws_s3_bucket" "tfstate" {
-  bucket = "project01-tfstate-bucket"
+  bucket = "project01-tfstate-bucket-13213891749871982"
 
   # 실수 방지 (삭제 방지)
   force_destroy = false
