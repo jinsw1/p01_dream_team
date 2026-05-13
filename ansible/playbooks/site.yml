@@ -1,5 +1,23 @@
+#project01/ansible/playbooks/site.yml
 ---
-- import_playbook: bootstrap.yml
-- import_playbook: bastion_setup.yml
-- import_playbook: was_setup.yml
-- import_playbook: db_setup.yml
+- import_playbook: bootstrap_adreamin.yml
+# - import_playbook: bastion_setup.yml
+# - import_playbook: was_setup.yml
+# - import_playbook: db_setup.yml
+
+# site.yml << ansible의 메인 진입점
+# ansible/playbooks내부의 playbook들을 import하여 순차적으로 자동실행
+# 아래는 import할 playbook형식
+# ---
+# - name: "bootstrap" <<  playbook 이름
+#   hosts: all  << 이 playbook을 적용받을 host - ex)bastion, was, db ....
+#   become: yes <<  sudo권한으로 실행? > yes / 일반권한으로 실행? > no
+                    # ec2-user는 sudo가능한 일반 사용자이며 자체 root가 아님 / aws에서 만들어주는 초기 ssh 접속용 기본 사용자
+#   roles:  <<  ansible역할(role)단위로 실행
+#     - bootstrap << roles/bootstrap안에 작업들을 자동으로 읽어서 실행
+                                    # 아래는 roles/bootstrap 내부 형식 예시
+                                    # defaults/
+                                    # handlers/
+                                    # templates/
+                                    # vars/
+                                    # files/
