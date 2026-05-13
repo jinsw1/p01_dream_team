@@ -22,14 +22,19 @@
     group: adreamin
     mode: "0700"
 
-- name: "authorized_keys 복사"
-  copy:
-    src: /home/ec2-user/.ssh/authorized_keys
-    dest: /home/adreamin/.ssh/authorized_keys
-    remote_src: yes
-    owner: adreamin
-    group: adreamin
-    mode: "0600"
+- name: "bastion 공개키 등록"
+  authorized_key:
+    user: adreamin
+    state: present
+    key: "{{ lookup('file', '~/.ssh/bastion-key.pem.pub') }}"
+  when: "'bastion' in group_names"
+
+- name: "was & db 공개키 등록"
+  authorized_key:
+    user: adreamin
+    state: present
+    key: "{{ lookup('file', '~/.ssh/ansible-key.pem.pub') }}"
+  when: "'was' in group_names or 'db' in group_names"
 
 - name: "목록 최신화를 위한 cache update"
   dnf:
@@ -45,4 +50,3 @@
       - wget
       - tar
     state: present
-

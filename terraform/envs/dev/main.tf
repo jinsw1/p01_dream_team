@@ -440,6 +440,8 @@ resource "local_file" "ssh_config" {
   filename = pathexpand("~/.ssh/config")
 
   content = <<EOT
+# 초기 설치용
+
 Host bastion01
     HostName ${module.project01_bastion_ec2.public_ip}
     User ec2-user
@@ -458,6 +460,28 @@ Host db01
     User ec2-user
     IdentityFile ~/.ssh/project01-db-key.pem
     ProxyJump bastion01
+    StrictHostKeyChecking no
+
+# 운영용
+
+Host bastion02
+    HostName ${module.project01_bastion_ec2.public_ip}
+    User adreamin
+    IdentityFile ~/.ssh/bastion-key.pem
+    StrictHostKeyChecking no
+
+Host was02
+    HostName ${module.project01_was01_ec2.private_ip}
+    User adreamin
+    IdentityFile ~/.ssh/ansible-key.pem
+    ProxyJump bastion02
+    StrictHostKeyChecking no
+
+Host db02
+    HostName ${module.project01_db_ec2.private_ip}
+    User adreamin
+    IdentityFile ~/.ssh/ansible-key.pem
+    ProxyJump bastion02
     StrictHostKeyChecking no
 EOT
 
