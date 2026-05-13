@@ -1,9 +1,10 @@
 #project01/ansible/playbooks/site.yml
 ---
-- import_playbook: bootstrap_adreamin.yml
-# - import_playbook: bastion_setup.yml
-# - import_playbook: was_setup.yml
-# - import_playbook: db_setup.yml
+- import_playbook: bootstrap.yml
+# - import_playbook: bootstrap_adreamin.yml
+- import_playbook: bastion_setup.yml
+- import_playbook: was_setup.yml
+- import_playbook: db_setup.yml
 
 # site.yml << ansible의 메인 진입점
 # ansible/playbooks내부의 playbook들을 import하여 순차적으로 자동실행
