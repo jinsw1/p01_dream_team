@@ -1,6 +1,6 @@
 terraform {
   backend "s3" {
-    bucket         = "project01-tfstate-bucket"
+    bucket         = "project01-tfstate-bucket-13213891749871982"
     key            = "dev/terraform.tfstate"
     region         = "ap-northeast-2"
     dynamodb_table = "dream-team-terraform-lock" #dream-team-terraform-lock	terraform-lock
