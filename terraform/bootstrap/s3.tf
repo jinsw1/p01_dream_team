@@ -9,7 +9,7 @@ resource "aws_s3_bucket" "tfstate" {
   }
 }
 
-# 버전 관리 (강력 추천)
+# 버전 관리
 resource "aws_s3_bucket_versioning" "tfstate_versioning" {
   bucket = aws_s3_bucket.tfstate.id
 
