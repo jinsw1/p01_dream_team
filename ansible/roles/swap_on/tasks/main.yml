@@ -1,0 +1,22 @@
+---
+- name: "swapfile 생성"
+  command: fallocate -l 1G /swapfile
+  args:
+    creates: /swapfile
+
+- name: "권한 설정"
+  file:
+    path: /swapfile
+    mode: '0600'
+
+- name: "swap 영역 생성"
+  command: mkswap /swapfile
+
+- name: "swap 활성화"
+  command: swapon /swapfile
+
+- name: "fstab 등록"
+  lineinfile:
+    path: /etc/fstab
+    line: "/swapfile none swap sw 0 0"
+    state: present

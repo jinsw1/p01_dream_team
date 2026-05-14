@@ -1,0 +1,8 @@
+---
+- name: "swap 비활성화"
+  command: swapoff -a
+
+- name: "swapfile 삭제"
+  file:
+    path: /swapfile
+    state: absent

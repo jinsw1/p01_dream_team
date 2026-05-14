@@ -1,6 +1,0 @@
-- name: Install nginx on WAS
-  hosts: was
-  become: yes
-
-  roles:
-    - nginx_setup
