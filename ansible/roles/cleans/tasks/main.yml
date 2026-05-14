@@ -1,0 +1,21 @@
+---
+- name: "dnf cache clean"
+  become: yes
+  command: dnf clean all
+  changed_when: false
+
+- name: "tmp directory clean"
+  become: yes
+  shell: rm -rf /tmp/*
+  changed_when: false
+
+- name: "journal log clean"
+  become: yes
+  command: journalctl --vacuum-time=1d
+  changed_when: false
+
+- name: "pip cache clean"
+  become: yes
+  shell: rm -rf /root/.cache/pip
+  changed_when: false
+  

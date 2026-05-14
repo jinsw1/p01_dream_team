@@ -1,7 +1,11 @@
 ---
 - name: "was setup"
   hosts: was
+  remote_user: adreamin
   become: yes
 
   roles:
-    - was_setup
+    - nginx_setup
+    - nodeExporter_setup
+    - venv_setup
+    - cleans

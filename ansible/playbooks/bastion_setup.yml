@@ -4,4 +4,8 @@
   remote_user: adreamin
   become: yes
   roles:
-    - bastion_setup
+    - swap_on
+    - prometheus_setup
+    - grafana_setup
+    - swap_off
+    - cleans

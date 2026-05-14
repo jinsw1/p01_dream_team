@@ -1,9 +1,10 @@
-- name: Install nginx
-  yum:
+---
+- name: "nginx 설치"
+  package:
     name: nginx
     state: present
 
-- name: Start nginx
+- name: "nginx 서비스 실행 및 활성화"
   service:
     name: nginx
     state: started

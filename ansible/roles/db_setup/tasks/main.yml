@@ -1,3 +1,0 @@
----
-- import_tasks: postgresql.yml
-- import_tasks: postgresql_exporter.yml

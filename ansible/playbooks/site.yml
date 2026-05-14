@@ -1,12 +1,11 @@
 #project01/ansible/playbooks/site.yml
----
-#- import_playbook: bootstrap.yml
-#- import_playbook: bootstrap_adreamin.yml
-- import_playbook: bastion_setup.yml
-#- import_playbook: was_setup.yml
-#- import_playbook: db_setup.yml
 
-#ansible-playbook -i inventories/bootstrap/inventory.yml playbooks/bootstrap_adreamin.yml
+---
+- import_playbook: bastion_setup.yml
+- import_playbook: was_setup.yml
+- import_playbook: db_setup.yml
+
+#ansible-playbook -i inventories/bootstrap/inventory.yml playbooks/bootstrap.yml
 #ansible-playbook -i inventories/dev/inventory.yml playbooks/site.yml
 
 # site.yml << ansible의 메인 진입점
