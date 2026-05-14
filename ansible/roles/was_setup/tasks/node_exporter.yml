@@ -28,16 +28,13 @@
       Description=Node Exporter
       After=network.target
 
-
       [Service]
       User=root
       ExecStart=/usr/local/bin/node_exporter
       Restart=always
 
-
       [Install]
       WantedBy=multi-user.target
-
 
 - name: "서비스 시작 및 활성화"
   systemd:

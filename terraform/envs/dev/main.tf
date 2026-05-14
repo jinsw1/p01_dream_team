@@ -303,7 +303,7 @@ module "project01_bastion_ec2" {
   key_name           = module.project01_bastion_ec2_key.key_name
   name               = "project01_bastion_ec2"
 
-  root_volume_size = 8
+  root_volume_size = 30
 }
 
 # WAS Server
@@ -316,7 +316,7 @@ module "project01_was01_ec2" {
   key_name           = module.project01_was_ec2_key.key_name
   name               = "project01-was01-ec2"
 
-  root_volume_size = 8
+  root_volume_size = 30
 }
 
 # DB Server
@@ -329,7 +329,7 @@ module "project01_db_ec2" {
   key_name           = module.project01_db_ec2_key.key_name
   name               = "project01_db_ec2"
 
-  root_volume_size = 8
+  root_volume_size = 30
 }
 
 ############################################
@@ -391,139 +391,154 @@ module "project01_alb" {
   }
 }
 
-
-
 ############################################
-# 7. Ansible - inventory.yml 생성
+# 7-1. Ansible - bootstrap전용 inventory.yml 생성
 ############################################
-resource "local_file" "ansible_inventory" {
+resource "local_file" "ansible_inventory_bootstrap" {
 
-  filename = "${path.root}/../../../ansible/inventories/dev/inventory.yml"
+  #filename = "${path.root}/../../../ansible/inventories/dev/inventory.yml"
+  filename = "${path.root}/../../../ansible/inventories/bootstrap/inventory.yml"
 
   content = yamlencode({
     all = {
-      children = {
+      # 기본값으로 ec2-user / bastion 키를 사용
+      vars = {
+        ansible_user                 = "ec2-user"
+        ansible_ssh_private_key_file = "~/.ssh/project01-bastion-key.pem"
+        # 호스트 키 체크 생략
+        ansible_host_key_checking    = false
+      }
 
+      children = {
         bastion = {
           hosts = {
-            bastion01 = {}
+            bastion01 = {
+              ansible_host                    = module.project01_bastion_ec2.public_ip
+              #ansible_user                    = "ec2-user"
+              ansible_ssh_private_key_file    = "~/.ssh/${module.project01_bastion_ec2_key.key_name}.pem"
+            }
           }
         }
 
         was = {
           hosts = {
-            was01 = {}
+            was01 = {
+              ansible_host                    = module.project01_was01_ec2.private_ip
+              #ansible_user                    = "adreamin"
+			  #ansible_user                    = "ec2-user"
+              ansible_ssh_private_key_file    = "~/.ssh/${module.project01_was_ec2_key.key_name}.pem"
+              #ansible_ssh_common_args        = "-o ProxyJump=bastion01"
+			  # .ssh/config 설정하지 않을경우
+			  	#ansible_ssh_common_args      = "-o ProxyJump=ec2-user@${module.project01_bastion_ec2.public_ip} -o IdentityFile=~/.ssh/project01-bastion-key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+              ansible_ssh_common_args = <<-EOT
+                -o ProxyCommand="ssh -i ~/.ssh/project01-bastion-key.pem -W %h:%p -q ec2-user@${module.project01_bastion_ec2.public_ip}"
+                -o StrictHostKeyChecking=no
+                -o UserKnownHostsFile=/dev/null
+              EOT			  
+            }
           }
         }
 
         db = {
           hosts = {
-            db01 = {}
+            db01 = {
+              ansible_host                    = module.project01_db_ec2.private_ip
+              #ansible_user                    = "adreamin"
+			  #ansible_user                    = "ec2-user"
+              ansible_ssh_private_key_file    = "~/.ssh/${module.project01_db_ec2_key.key_name}.pem"
+              #ansible_ssh_common_args        = "-o ProxyJump=bastion01"
+			  # .ssh/config 설정하지 않을경우
+			  	#ansible_ssh_common_args      = "-o ProxyJump=ec2-user@${module.project01_bastion_ec2.public_ip} -o IdentityFile=~/.ssh/project01-bastion-key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+              ansible_ssh_common_args = <<-EOT
+                -o ProxyCommand="ssh -i ~/.ssh/project01-bastion-key.pem -W %h:%p -q ec2-user@${module.project01_bastion_ec2.public_ip}"
+                -o StrictHostKeyChecking=no
+                -o UserKnownHostsFile=/dev/null
+              EOT				
+            }
           }
         }
       }
     }
   })
 
+  # EC2 인스턴스가 만들어진 후에 인벤토리를 생성해야 하므로 depends_on 을 걸어줍니다.
   depends_on = [
     module.project01_bastion_ec2,
     module.project01_was01_ec2,
-    module.project01_db_ec2
+    module.project01_db_ec2,
   ]
 }
 
 ############################################
-# 8. SSH Config 생성
+# 7-2. Ansible - prod/dev 전용 inventory.yml 생성
 ############################################
-resource "local_file" "ssh_config" {
+resource "local_file" "ansible_inventory_prod" {
 
-  filename = pathexpand("~/.ssh/config")
-
-  content = <<EOT
-# 초기 설치용
-
-Host bastion01
-    HostName ${module.project01_bastion_ec2.public_ip}
-    User ec2-user
-    IdentityFile ~/.ssh/project01-bastion-key.pem
-    StrictHostKeyChecking no
-
-Host was01
-    HostName ${module.project01_was01_ec2.private_ip}
-    User ec2-user
-    IdentityFile ~/.ssh/project01-was-key.pem
-    ProxyJump bastion01
-    StrictHostKeyChecking no
-
-Host db01
-    HostName ${module.project01_db_ec2.private_ip}
-    User ec2-user
-    IdentityFile ~/.ssh/project01-db-key.pem
-    ProxyJump bastion01
-    StrictHostKeyChecking no
-
-# 운영용
-
-Host bastion02
-    HostName ${module.project01_bastion_ec2.public_ip}
-    User adreamin
-    IdentityFile ~/.ssh/bastion-key.pem
-    StrictHostKeyChecking no
-
-Host was02
-    HostName ${module.project01_was01_ec2.private_ip}
-    User adreamin
-    IdentityFile ~/.ssh/ansible-key.pem
-    ProxyJump bastion02
-    StrictHostKeyChecking no
-
-Host db02
-    HostName ${module.project01_db_ec2.private_ip}
-    User adreamin
-    IdentityFile ~/.ssh/ansible-key.pem
-    ProxyJump bastion02
-    StrictHostKeyChecking no
-EOT
-
-  depends_on = [
-    module.project01_bastion_ec2,
-    module.project01_was01_ec2,
-    module.project01_db_ec2
-  ]
-}
-
-/*
-resource "local_file" "ansible_inventory" {
-
-  #filename = "${path.module}/inventory.yml"
-  filename = "../../../ansible/inventory.yml"
+  filename = "${path.root}/../../../ansible/inventories/dev/inventory.yml"
 
   content = yamlencode({
     all = {
-      children = {
+      # 기본값으로 ec2-user / bastion 키를 사용
+      vars = {
+        ansible_user                 = "adreamin"
+        ansible_ssh_private_key_file = "~/.ssh/ansible-key.pem"
+        # 호스트 키 체크 생략
+        ansible_host_key_checking    = false
+      }
 
+      children = {
         bastion = {
           hosts = {
-            "${module.project01_bastion_ec2.public_ip}" = {
-              ansible_user                 = "ec2-user"
-              ansible_ssh_private_key_file = "${path.module}/${module.project01_was_ec2_key.key_name}.pem"
+            bastion01 = {
+              ansible_host                    = module.project01_bastion_ec2.public_ip
+			  ansible_ssh_private_key_file = "~/.ssh/bastion-key.pem"
             }
           }
         }
 
         was = {
           hosts = {
-            "${module.project01_was01_ec2.private_ip}" = {
-              ansible_user                 = "ec2-user"
-              ansible_ssh_private_key_file = "${path.module}/project01-key-was.pem"
+            was01 = {
+              ansible_host                    = module.project01_was01_ec2.private_ip
+              #ansible_user                    = "adreamin"
+			  #ansible_user                    = "ec2-user"              
+              #ansible_ssh_common_args        = "-o ProxyJump=bastion01"
+			  # .ssh/config 설정하지 않을경우
+			  	#ansible_ssh_common_args      = "-o ProxyJump=adreamin@${module.project01_bastion_ec2.public_ip} -o IdentityFile=~/.ssh/bastion-key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+              ansible_ssh_common_args = <<-EOT
+                -o ProxyCommand="ssh -i ~/.ssh/bastion-key.pem -W %h:%p -q adreamin@${module.project01_bastion_ec2.public_ip}"
+                -o StrictHostKeyChecking=no
+                -o UserKnownHostsFile=/dev/null
+              EOT				
+            }
+          }
+        }
 
-              # Bastion 경유 SSH 접속
-              ansible_ssh_common_args = "-o ProxyCommand='ssh -W %h:%p -i ${path.module}/project01-key-mgmt.pem ec2-user@${module.project01_bastion_ec2.public_ip}'"
+        db = {
+          hosts = {
+            db01 = {
+              ansible_host                    = module.project01_db_ec2.private_ip
+              #ansible_user                    = "adreamin"
+			  #ansible_user                    = "ec2-user"
+              #ansible_ssh_common_args        = "-o ProxyJump=bastion01"
+			  # .ssh/config 설정하지 않을경우
+			  	#ansible_ssh_common_args      = "-o ProxyJump=adreamin@${module.project01_bastion_ec2.public_ip} -o IdentityFile=~/.ssh/bastion-key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+              ansible_ssh_common_args = <<-EOT
+                -o ProxyCommand="ssh -i ~/.ssh/bastion-key.pem -W %h:%p -q adreamin@${module.project01_bastion_ec2.public_ip}"
+                -o StrictHostKeyChecking=no
+                -o UserKnownHostsFile=/dev/null
+              EOT				
             }
           }
         }
       }
     }
   })
+
+  # EC2 인스턴스가 만들어진 후에 인벤토리를 생성해야 하므로 depends_on 을 걸어줍니다.
+  depends_on = [
+    module.project01_bastion_ec2,
+    module.project01_was01_ec2,
+    module.project01_db_ec2,
+  ]
 }
-*/

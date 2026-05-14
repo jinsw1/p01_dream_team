@@ -1,6 +1,7 @@
 ---
-- name: "bootstrap_adreamin"
+- name: "bootstrap_adreamin"  
   hosts: all
+  remote_user: adreamin
   become: yes
 
   roles:

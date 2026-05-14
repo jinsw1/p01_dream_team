@@ -1,0 +1,21 @@
+- name: 현재 로그인 사용자 확인
+  ansible.builtin.command: whoami
+  register: current_user
+
+- name: 출력
+  ansible.builtin.debug:
+    msg: "Current user = {{ current_user.stdout }}"
+
+- name: remote_user 확인
+  ansible.builtin.debug:
+    msg: "remote_user = {{ ansible_user }}"
+
+- name: SSH 접속 사용자
+  ansible.builtin.debug:
+    msg: "ansible_user = {{ ansible_user }}"
+
+- name: 사용자 상태 전체 확인
+  ansible.builtin.debug:
+    msg:
+      - "ansible_user = {{ ansible_user }}"
+      - "effective user = {{ ansible_facts.user_id }}"
