@@ -1,0 +1,27 @@
+"all":
+  "children":
+    "bastion":
+      "hosts":
+        "bastion01":
+          "ansible_host": "13.124.83.67"
+          "ansible_ssh_private_key_file": "~/.ssh/project01-bastion-key.pem"
+    "db":
+      "hosts":
+        "db01":
+          "ansible_host": "10.0.30.72"
+          "ansible_ssh_common_args": "-o ProxyCommand=\"ssh -i ~/.ssh/project01-bastion-key.pem
+            -W %h:%p -q ec2-user@13.124.83.67\"\r\n-o StrictHostKeyChecking=no\r\n-o
+            UserKnownHostsFile=/dev/null\r\n"
+          "ansible_ssh_private_key_file": "~/.ssh/project01-db-key.pem"
+    "was":
+      "hosts":
+        "was01":
+          "ansible_host": "10.0.10.103"
+          "ansible_ssh_common_args": "-o ProxyCommand=\"ssh -i ~/.ssh/project01-bastion-key.pem
+            -W %h:%p -q ec2-user@13.124.83.67\"\r\n-o StrictHostKeyChecking=no\r\n-o
+            UserKnownHostsFile=/dev/null\r\n"
+          "ansible_ssh_private_key_file": "~/.ssh/project01-was-key.pem"
+  "vars":
+    "ansible_host_key_checking": false
+    "ansible_ssh_private_key_file": "~/.ssh/project01-bastion-key.pem"
+    "ansible_user": "ec2-user"

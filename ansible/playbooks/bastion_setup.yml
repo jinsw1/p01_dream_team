@@ -1,7 +1,7 @@
 ---
-- name: "bastion setup"
+- name: "bastion setup"  
   hosts: bastion
+  remote_user: adreamin
   become: yes
-
   roles:
     - bastion_setup
