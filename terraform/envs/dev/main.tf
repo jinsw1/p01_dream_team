@@ -223,6 +223,13 @@ module "project01_was_sg" {
       protocol        = "tcp"
       security_groups = [module.project01_alb_sg.sg_id]
       description     = "ALB to WAS HTTP Access"
+    },
+    {
+      from_port       = 9100
+      to_port         = 9100
+      protocol        = "tcp"
+      security_groups = [module.project01_bastion_sg.sg_id]
+      description     = "Bastion to prometheus Node Exporter"
     }
   ]
   egress_rules = [
@@ -257,6 +264,20 @@ module "project01_db_sg" {
       protocol        = "tcp"
       security_groups = [module.project01_was_sg.sg_id]
       description     = "WAS to DB Access"
+    },
+     {
+      from_port       = 9100
+      to_port         = 9100
+      protocol        = "tcp"
+      security_groups = [module.project01_bastion_sg.sg_id]
+      description     = "Bastion to prometheus Node Exporter"
+    },
+     {
+      from_port       = 9187
+      to_port         = 9187
+      protocol        = "tcp"
+      security_groups = [module.project01_bastion_sg.sg_id]
+      description     = "Bastion to prometheus postgres Exporter"
     }
   ]
   egress_rules = [
@@ -302,6 +323,9 @@ module "project01_bastion_ec2" {
   security_group_ids = [module.project01_bastion_sg.sg_id]
   key_name           = module.project01_bastion_ec2_key.key_name
   name               = "project01_bastion_ec2"
+  tags               = { Role = "Bastion" }
+
+  iam_instance_profile = aws_iam_instance_profile.bastion_profile.name
 
   root_volume_size = 30
 }
@@ -315,6 +339,7 @@ module "project01_was01_ec2" {
   security_group_ids = [module.project01_was_sg.sg_id]
   key_name           = module.project01_was_ec2_key.key_name
   name               = "project01-was01-ec2"
+  tags               = { Role = "WAS" }
 
   root_volume_size = 30
 }
@@ -328,6 +353,7 @@ module "project01_db_ec2" {
   security_group_ids = [module.project01_db_sg.sg_id]
   key_name           = module.project01_db_ec2_key.key_name
   name               = "project01_db_ec2"
+  tags               = { Role = "DB" }
 
   root_volume_size = 30
 }
@@ -541,4 +567,33 @@ resource "local_file" "ansible_inventory_prod" {
     module.project01_was01_ec2,
     module.project01_db_ec2,
   ]
+}
+
+## bastion에 IAMROLE 권한 부여
+
+# 1단계: 바스천 서버 전용 IAM 롤 정의 (EC2가 이 역할을 가질 수 있게 허용)
+resource "aws_iam_role" "bastion_discovery_role" {
+  name = "Bastion-Prometheus-Discovery-Role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Action    = "sts:AssumeRole"
+      Effect    = "Allow"
+      Principal = { Service = "ec2.amazonaws.com" }
+    }]
+  })
+}
+
+# 2단계 : EC2 정보를 읽어올 수 있는 권한 부여 (S3 대신 EC2ReadOnly 선택)
+resource "aws_iam_role_policy_attachment" "ec2_read_only" {
+  role       = aws_iam_role.bastion_discovery_role.name
+  # AWS에서 제공하는 표준 권한입니다.
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess"
+}
+
+# 3단계 : 이 신분증을 바스천 EC2에 입히기 위한 케이스(Profile) 만들기
+resource "aws_iam_instance_profile" "bastion_profile" {
+  name = "Bastion-Discovery-Instance-Profile"
+  role = aws_iam_role.bastion_discovery_role.name
 }
