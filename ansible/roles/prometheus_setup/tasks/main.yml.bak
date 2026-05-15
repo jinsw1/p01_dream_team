@@ -1,0 +1,7 @@
+--- # galaxy 이용버전
+- name: "galaxy collection 다운"
+  command: ansible-galaxy collection install prometheus.prometheus
+  
+- name: "Prometheus설치 및 설정(connection활용)"
+  include_role:
+    name: prometheus.prometheus.prometheus

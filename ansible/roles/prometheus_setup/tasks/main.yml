@@ -1,4 +1,109 @@
 ---
-- name: "Prometheus설치 및 설정(connection활용)"
-  include_role:
-    name: prometheus.prometheus.prometheus
+- name: "prometheus 그룹 생성"
+  group:
+    name: "{{ prometheus_group }}"
+    system: yes
+    state: present
+
+- name: "prometheus 시스템 유저 생성"
+  user:
+    name: "{{ prometheus_user }}"
+    group: "{{ prometheus_group }}"
+    system: yes
+    shell: /sbin/nologin
+    create_home: no
+
+- name: "Prometheus 디렉토리 생성"
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ prometheus_user }}"
+    group: "{{ prometheus_group }}"
+    mode: "0755"
+  loop:
+    - "{{ prometheus_install_dir }}"
+    - "{{ prometheus_config_dir }}"
+    - "{{ prometheus_data_dir }}"
+
+- name: "Prometheus 다운로드"
+  get_url:
+    url: "https://github.com/prometheus/prometheus/releases/download/v{{ prometheus_version }}/prometheus-{{ prometheus_version }}.linux-amd64.tar.gz"
+    dest: "/tmp/prometheus-{{ prometheus_version }}.linux-amd64.tar.gz"
+    mode: "0644"
+
+- name: "Prometheus 압축 해제"
+  unarchive:
+    src: "/tmp/prometheus-{{ prometheus_version }}.linux-amd64.tar.gz"
+    dest: "{{ prometheus_install_dir }}"
+    remote_src: yes
+    creates: "{{ prometheus_install_dir }}/prometheus-{{ prometheus_version }}.linux-amd64/prometheus"
+
+- name: "Prometheus 바이너리 설치"
+  copy:
+    src: "{{ prometheus_install_dir }}/prometheus-{{ prometheus_version }}.linux-amd64/{{ item }}"
+    dest: "/usr/local/bin/{{ item }}"
+    remote_src: yes
+    owner: root
+    group: root
+    mode: "0755"
+  loop:
+    - prometheus
+    - promtool
+
+- name: "console 디렉토리 복사"
+  copy:
+    src: "{{ prometheus_install_dir }}/prometheus-{{ prometheus_version }}.linux-amd64/{{ item }}"
+    dest: "{{ prometheus_config_dir }}/"
+    remote_src: yes
+    owner: "{{ prometheus_user }}"
+    group: "{{ prometheus_group }}"
+    mode: "0755"
+  loop:
+    - consoles
+    - console_libraries
+
+- name: "prometheus.yml 생성" # 임시로 생성한 파일
+  template: # templates 폴더
+    src: prometheus.yml.j2
+    dest: /etc/prometheus/prometheus.yml
+    owner: "{{ prometheus_user }}"
+    group: "{{ prometheus_group }}"
+    mode: "0644"
+  notify:
+    - restart_prometheus
+
+- name: "Prometheus systemd 서비스 등록"
+  copy:
+    dest: /etc/systemd/system/prometheus.service
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=Prometheus
+      Wants=network-online.target
+      After=network-online.target
+
+      [Service]
+      User={{ prometheus_user }}
+      Group={{ prometheus_group }}
+      Type=simple
+      ExecStart=/usr/local/bin/prometheus \
+        --config.file={{ prometheus_config_dir }}/prometheus.yml \
+        --storage.tsdb.path={{ prometheus_data_dir }} \
+        --web.listen-address={{ prometheus_web_listen_address }} \
+        --web.console.templates={{ prometheus_config_dir }}/consoles \
+        --web.console.libraries={{ prometheus_config_dir }}/console_libraries
+
+      Restart=on-failure
+
+      [Install]
+      WantedBy=multi-user.target
+  notify:
+    - daemon_reload
+
+
+- name: "Prometheus 시작 및 부팅 자동실행"
+  systemd:
+    name: prometheus
+    state: started
+    enabled: yes
+    
