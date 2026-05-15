@@ -8,4 +8,4 @@
     - nginx_setup
     - nodeExporter_setup
     - venv_setup
-    - cleans
+    # - cleans
