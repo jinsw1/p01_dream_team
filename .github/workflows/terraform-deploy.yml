@@ -5,7 +5,7 @@ on:
     workflows: ["bootstrap"]
     types: [completed]
     branches: [main]
-#또는 main branch에 paths에 해당하는 폴더 내부가 변경되었을 때 deploy.yml 실행
+#또는 main branch에 paths에 해당하는 폴더 내부가 변경되었을 때 deploy.yml 실행!
   push:
     branches: [main]
     paths:
