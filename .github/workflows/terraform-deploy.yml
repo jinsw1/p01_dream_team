@@ -1,24 +1,33 @@
-name: "Terraform dev 파일의 내용 구성"
+name: "deploy"
 on:
+#bootstrap이 정상적으로 실행되었을 때 deploy.yml 실행
   workflow_run:
     workflows: ["bootstrap"]
     types: [completed]
     branches: [main]
+#또는 main branch에 paths에 해당하는 폴더 내부가 변경되었을 때 deploy.yml 실행
+  push:
+    branches: [main]
+    paths:
+      - 'terraform/**'
+
 jobs:
   deploy:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: |
+      github.event_name == 'push' ||
+      github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     env:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v5  
     
       - name: setup Terraform
-        uses: hashicorp/setup-terraform@v4
+        uses: hashicorp/setup-terraform@v4  
      
       - name: terraform init & apply
         working-directory: ./terraform/envs/dev
         run: |
           terraform init
-          terraform apply --auto-approve
+          terraform apply -auto-approve  # --auto-approve → -auto-approve

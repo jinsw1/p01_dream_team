@@ -1,0 +1,136 @@
+name: "ansible"
+  # =============================================================================================
+  #   terraform-deploy.yml / ansible.yml이 main 브랜치에 푸쉬되었는데  파일의 변화가 있는 것이 조건 
+  # =============================================================================================
+on:
+  workflow_run:
+    workflows: ["deploy"]
+    types: [completed]
+    branches: [main]
+  push:
+    branches: [main]
+    paths:
+      - 'ansible/**'
+jobs:
+  # ================================
+  # 1. 전체 실행 (deploy 완료 후)
+  # ================================
+  run-all:
+    if: |
+      github.event_name == 'workflow_run' &&
+      github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Run All Playbooks
+        run: |
+          cd ansible
+          ansible-playbook -i inventories/dev/inventory.yml playbooks/site.yml
+  # ================================
+  # 2. 변경 감지 (push일 때만)
+  # ================================
+  detect:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps: 
+      - uses: actions/checkout@v5
+      - uses: dorny/paths-filter@v4
+        id: filter
+        with:
+          filters: |
+            bastion:
+              - 'ansible/roles/bastion_setup/**'
+              - 'ansible/playbooks/bastion_setup.yml'
+            was:
+              - 'ansible/roles/was_setup/**'
+              - 'ansible/playbooks/was_setup.yml'
+            db:
+              - 'ansible/roles/db_setup/**'
+              - 'ansible/playbooks/db_setup.yml'
+            bootstrap:
+              - 'ansible/roles/bootstrap/**'
+              - 'ansible/playbooks/bootstrap.yml'
+            bootstrap_adreamin:
+              - 'ansible/roles/bootstrap_adreamin/**'
+              - 'ansible/playbooks/bootstrap_adreamin.yml'
+            nginx:
+              - 'ansible/roles/nginx_setup/**'
+              - 'ansible/playbooks/nginx.yml'
+
+    outputs:
+      bastion: ${{ steps.filter.outputs.bastion }}
+      was: ${{ steps.filter.outputs.was }}
+      db: ${{ steps.filter.outputs.db }}
+      bootstrap: ${{ steps.filter.outputs.bootstrap }}
+      bootstrap_adreamin: ${{ steps.filter.outputs.bootstrap_adreamin }}
+      nginx: ${{ steps.filter.outputs.nginx }}
+
+  # ================================
+  # 3. 분기 실행 (push + 변경된 것만)
+  # ================================
+  bastion-setup:
+    needs: detect
+    if: needs.detect.outputs.bastion == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Run Bastion Playbook
+        run: |
+          cd ansible
+          ansible-playbook -i inventories/dev/inventory.yml playbooks/bastion_setup.yml
+
+  was-setup:
+    needs: detect
+    if: needs.detect.outputs.was == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Run WAS Playbook
+        run: |
+          cd ansible
+          ansible-playbook -i inventories/dev/inventory.yml playbooks/was_setup.yml
+
+  db-setup:
+    needs: detect
+    if: needs.detect.outputs.db == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Run DB Playbook
+        run: |
+          cd ansible
+          ansible-playbook -i inventories/dev/inventory.yml playbooks/db_setup.yml
+
+  nginx-setup:
+    needs: detect
+    if: needs.detect.outputs.nginx == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Run Nginx Playbook
+        run: |
+          cd ansible
+          ansible-playbook -i inventories/dev/inventory.yml playbooks/nginx.yml
+
+  bootstrap-setup:
+    needs: detect
+    if: needs.detect.outputs.bootstrap == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Run Bootstrap Playbook
+        run: |
+          cd ansible
+          ansible-playbook -i inventories/dev/inventory.yml playbooks/bootstrap.yml
+
+  bootstrap-adreamin-setup:
+    needs: detect
+    if: needs.detect.outputs.bootstrap_adreamin == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Run Bootstrap Adreamin Playbook
+        run: |
+          cd ansible
+          ansible-playbook -i inventories/dev/inventory.yml playbooks/bootstrap_adreamin.yml
+     
