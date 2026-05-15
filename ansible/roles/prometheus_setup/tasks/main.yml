@@ -1,4 +1,4 @@
----
+--- # galaxy 이용버전
 - name: "Prometheus설치 및 설정(connection활용)"
   include_role:
     name: prometheus.prometheus.prometheus

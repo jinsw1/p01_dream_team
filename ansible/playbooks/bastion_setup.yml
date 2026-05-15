@@ -8,4 +8,4 @@
     - prometheus_setup
     - grafana_setup
     - swap_off
-    - cleans
+    # - cleans

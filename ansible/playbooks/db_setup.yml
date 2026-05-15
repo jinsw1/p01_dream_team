@@ -7,4 +7,4 @@
     - postgre_setup
     - postgreExporter_setup
     - nodeExporter_setup
-    - cleans
+    # - cleans
