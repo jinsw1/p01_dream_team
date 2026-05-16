@@ -39,15 +39,9 @@ resource "aws_lb_target_group" "this" {
   }
 }
 
-# EC2 등록
-resource "aws_lb_target_group_attachment" "this" {
-/*
-  for_each = toset(var.target_instance_ids)
+# EC2 등록 (ASG가 아닌 초기인프라 구성시 만들어지는 EC2)
+resource "aws_lb_target_group_attachment" "this" { 
 
-  target_group_arn = aws_lb_target_group.this.arn
-  target_id        = each.value
-  port             = 80
-*/
   for_each = var.target_instance_ids
 
   target_group_arn = aws_lb_target_group.this.arn

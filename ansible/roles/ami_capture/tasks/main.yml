@@ -22,6 +22,6 @@
   - name: 방금 세팅 끝난 이 서버를 AMI로 자동 캡처하기
     amazon.aws.ec2_ami:
       instance_id: "{{ ec2_metadata.content }}"  # ID 자동 주입
-      name: "project01-was-ec2-{{ ansible_date_time.iso8601_basic_short }}"
+      name: "project01-was-ec2--ami-{{ ansible_date_time.iso8601_basic_short }}"
       wait: yes # 캡처가 완전히 끝날 때까지 앤서블이 기다려줌
     delegate_to: localhost # 이 명령은 서버 안이 아니라 밖(로컬)에서 날림

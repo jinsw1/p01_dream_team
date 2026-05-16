@@ -359,6 +359,30 @@ module "project01_db_ec2" {
 }
 
 ############################################
+# Auto Scailng (ASG)
+############################################
+
+module "asg" {
+  source = "../modules/asg"
+
+  asg_name = "lecture-asg"
+
+  instance_type = "t2.micro"
+
+  desired_capacity = 2
+  min_size         = 1
+  max_size         = 4
+
+  subnet_ids = [
+    module.project01_private_subnet_was.subnet_id
+  ]
+
+  security_group_id = module.project01_was_sg.id
+
+  key_name = module.kp.key_name
+}
+
+############################################
 # 6. LOAD BALANCER (ALB)
 ############################################
 
