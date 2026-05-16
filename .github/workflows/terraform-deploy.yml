@@ -23,6 +23,9 @@ jobs:
     steps:
       - uses: actions/checkout@v5
     
+      - name: Wait for S3 bucket
+        run: aws s3api wait bucket-exists --bucket project01-tfstate-bucket-mk
+        
       - name: setup Terraform
         uses: hashicorp/setup-terraform@v4
 
