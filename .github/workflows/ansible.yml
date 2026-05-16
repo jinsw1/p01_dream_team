@@ -23,7 +23,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - uses: ./.github/actions                                          
+      - uses: ./.github/actions/setup-ansible                                         
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -103,7 +103,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       
-      - uses: ./.github/actions                                         
+      - uses: ./.github/actions/setup-ansible                                        
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -120,7 +120,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       
-      - uses: ./.github/actions                                         
+      - uses: ./.github/actions/setup-ansible                                          
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -137,7 +137,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       
-      - uses: ./.github/actions                                         
+      - uses: ./.github/actions/setup-ansible                                          
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -154,7 +154,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       
-      - uses: ./.github/actions                                         
+      - uses: ./.github/actions/setup-ansible                                        
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -171,7 +171,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       
-      - uses: ./.github/actions                                         
+      - uses: ./.github/actions/setup-ansible                                         
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
