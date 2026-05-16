@@ -9,3 +9,4 @@
     - nodeExporter_setup
     - venv_setup
     # - cleans
+    - ami_capture # 가장 마지막에 실행되어야함
