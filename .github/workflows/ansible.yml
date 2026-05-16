@@ -22,9 +22,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+
+      - uses: ./.github/actions                                          
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+          ##############################################
+          bastion-ssh-key: ${{ secrets.BASTION_SSH_KEY }}           
+          ansible-ssh-key: ${{ secrets.ANSIBLE_SSH_KEY }}            
+          ###############################################
       - name: Run All Playbooks
         run: |
           cd ansible
+          ansible-playbook -i inventories/bootstrap/inventory.yml playbooks/bootstrap.yml
           ansible-playbook -i inventories/dev/inventory.yml playbooks/site.yml
   # ================================
   # 2. 변경 감지 (push일 때만)
@@ -74,6 +85,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+
+      - uses: ./.github/actions                                         
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
       - name: Run Bastion Playbook
         run: |
           cd ansible
@@ -85,6 +102,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+      
+      - uses: ./.github/actions                                         
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
       - name: Run WAS Playbook
         run: |
           cd ansible
@@ -96,6 +119,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+      
+      - uses: ./.github/actions                                         
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
       - name: Run DB Playbook
         run: |
           cd ansible
@@ -107,6 +136,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+      
+      - uses: ./.github/actions                                         
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
       - name: Run Nginx Playbook
         run: |
           cd ansible
@@ -118,10 +153,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+      
+      - uses: ./.github/actions                                         
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
       - name: Run Bootstrap Playbook
         run: |
           cd ansible
-          ansible-playbook -i inventories/dev/inventory.yml playbooks/bootstrap.yml
+          ansible-playbook -i inventories/bootstrap/inventory.yml playbooks/bootstrap.yml
 
   bootstrap-adreamin-setup:
     needs: detect
@@ -129,8 +170,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+      
+      - uses: ./.github/actions                                         
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
       - name: Run Bootstrap Adreamin Playbook
         run: |
           cd ansible
-          ansible-playbook -i inventories/dev/inventory.yml playbooks/bootstrap_adreamin.yml
+          ansible-playbook -i inventories/bootstrap/inventory.yml playbooks/bootstrap.yml
      

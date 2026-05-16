@@ -22,19 +22,43 @@
     group: adreamin
     mode: "0700"
 
+# - name: "bastion 공개키 등록"
+#   authorized_key:
+#     user: adreamin
+#     state: present
+#     key: "{{ lookup('file', '~/.ssh/bastion-key.pem.pub') }}"
+#   when: "'bastion' in group_names"
+
+# - name: "was & db 공개키 등록"
+#   authorized_key:
+#     user: adreamin
+#     state: present
+#     key: "{{ lookup('file', '~/.ssh/ansible-key.pem.pub') }}"
+#   when: "'was' in group_names or 'db' in group_names"
+
+
+#============================================
+# var.files/all.yml 에 등록된 pub 파일 가져오기
+#============================================
 - name: "bastion 공개키 등록"
   authorized_key:
     user: adreamin
     state: present
-    key: "{{ lookup('file', '~/.ssh/bastion-key.pem.pub') }}"
+    key: "{{ bastion_pub_key }}"
   when: "'bastion' in group_names"
 
 - name: "was & db 공개키 등록"
   authorized_key:
     user: adreamin
     state: present
-    key: "{{ lookup('file', '~/.ssh/ansible-key.pem.pub') }}"
+    key: "{{ ansible_pub_key }}"
   when: "'was' in group_names or 'db' in group_names"
+
+#==========================================
+
+
+
+
 
 #- name: "목록 최신화를 위한 cache update"
 #  dnf:
