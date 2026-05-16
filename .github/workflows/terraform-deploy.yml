@@ -1,11 +1,11 @@
 name: "deploy"
 on:
-#bootstrap이 정상적으로 실행되었을 때 deploy.yml 실행
+# bootstrap이 정상적으로 실행되었을 때 deploy.yml 실행
   workflow_run:
     workflows: ["bootstrap"]
     types: [completed]
     branches: [main]
-#또는 main branch에 paths에 해당하는 폴더 내부가 변경되었을 때 deploy.yml 실행!
+# 또는 main branch에 paths에 해당하는 폴더 내부가 변경되었을 때 deploy.yml 실행!
   push:
     branches: [main]
     paths:
@@ -25,7 +25,7 @@ jobs:
     
       - name: Wait for S3 bucket
         run: aws s3api wait bucket-exists --bucket project01-tfstate-bucket-mk
-        
+
       - name: setup Terraform
         uses: hashicorp/setup-terraform@v4
 
@@ -34,3 +34,9 @@ jobs:
         run: |
           terraform init
           terraform apply --auto-approve
+
+# 생성된 인벤토리를 S3의 이번 workflow 전용 폴더에 업로드
+      - name: Upload Inventory to S3
+        run: |
+          aws s3 cp ansible/inventories/bootstrap/inventory.yml s3://project01-tfstate-bucket-mk/bootstrap/inventory.yml
+          aws s3 cp ansible/inventories/dev/inventory.yml s3://project01-tfstate-bucket-mk/dev/inventory.yml

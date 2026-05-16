@@ -50,7 +50,17 @@ runs:
         echo "${{ inputs.ansible-ssh-key }}" | ssh-add -
 
       # ssh-add -l 디버깅용 ssh agent 목록 보기
-    # 4. ec2가 ssh 접속을 허용할 때 까지 시간이 필요하여 기다리기
+
+      # 4. s3 에 저장되있는 inventory.yml 불러오기
+    - name: Download inventories from S3
+      shell: bash
+      run: |
+        mkdir -p ansible/inventories/bootstrap ansible/inventories/dev
+        aws s3 cp s3://project01-tfstate-bucket-mk/bootstrap/inventory.yml ansible/inventories/bootstrap/inventory.yml
+        aws s3 cp s3://project01-tfstate-bucket-mk/dev/inventory.yml ansible/inventories/dev/inventory.yml
+
+
+    # 5. ec2가 ssh 접속을 허용할 때 까지 시간이 필요하여 기다리기
     - name: Wait for Bastion SSH ready
       shell: bash
       run: |
@@ -58,10 +68,8 @@ runs:
           --filters "Name=tag:Name,Values=*bastion*" "Name=instance-state-name,Values=running" \
           --query 'Reservations[].Instances[].PublicIpAddress' \
           --output text)
-        
-        echo "Bastion IP: $BASTION_IP"
+
         echo "Waiting for SSH on port 22..."
         
         timeout 300 bash -c "until nc -zv $BASTION_IP 22 2>/dev/null; do echo 'Waiting...'; sleep 5; done"
         sleep 10
-        echo "✅ Bastion SSH ready"
