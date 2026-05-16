@@ -159,7 +159,7 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
-      - name: Run Bootstrap Playbook
+      - name: Run Bootstrap Playbook 
         run: |
           cd ansible
           ansible-playbook -i inventories/bootstrap/inventory.yml playbooks/bootstrap.yml
