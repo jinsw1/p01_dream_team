@@ -1,7 +1,9 @@
 name: "bootstrap"
 on:
   push:
-    branches: ["main"] 
+    branches: ["main"]
+    paths:
+      - 'terraform/bootstrap/**'
 jobs:
   deploy:
     runs-on: ubuntu-latest
