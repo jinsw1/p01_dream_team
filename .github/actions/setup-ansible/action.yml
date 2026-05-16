@@ -50,3 +50,18 @@ runs:
         echo "${{ inputs.ansible-ssh-key }}" | ssh-add -
 
       # ssh-add -l 디버깅용 ssh agent 목록 보기
+    # 4. ec2가 ssh 접속을 허용할 때 까지 시간이 필요하여 기다리기
+    - name: Wait for Bastion SSH ready
+      shell: bash
+      run: |
+        BASTION_IP=$(aws ec2 describe-instances \
+          --filters "Name=tag:Name,Values=*bastion*" "Name=instance-state-name,Values=running" \
+          --query 'Reservations[].Instances[].PublicIpAddress' \
+          --output text)
+        
+        echo "Bastion IP: $BASTION_IP"
+        echo "Waiting for SSH on port 22..."
+        
+        timeout 300 bash -c "until nc -zv $BASTION_IP 22 2>/dev/null; do echo 'Waiting...'; sleep 5; done"
+        sleep 10
+        echo "✅ Bastion SSH ready"
