@@ -32,6 +32,18 @@ jobs:
           bastion-ssh-key: ${{ secrets.BASTION_SSH_KEY }}           
           ansible-ssh-key: ${{ secrets.ANSIBLE_SSH_KEY }}            
           ###############################################
+          
+      - name: Debug - check SSH keys
+        run: |
+          echo "=== ~/.ssh 디렉토리 ==="
+          ls -la ~/.ssh/
+          echo ""
+          echo "=== bastion 키 첫 줄 (BEGIN으로 시작해야 정상) ==="
+          head -1 ~/.ssh/project01-bastion-key.pem
+          echo ""
+          echo "=== inventory 내용 ==="
+          cat ansible/inventories/bootstrap/inventory.yml
+
       - name: Run All Playbooks
         run: |
           cd ansible
