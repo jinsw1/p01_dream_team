@@ -1,0 +1,7 @@
+prometheus_version: "2.47.0"
+prometheus_user: prometheus
+prometheus_group: prometheus
+prometheus_install_dir: "/opt/prometheus" # 압축되어있던 원본
+prometheus_config_dir: "/etc/prometheus" # 서비스 등록
+prometheus_data_dir: "/var/lib/prometheus" # 가져온 데이터 저장위치 | 계속 받으면 커질 수 있음
+prometheus_web_listen_address: "0.0.0.0:9090" # 모든 ip 9090으로 허용

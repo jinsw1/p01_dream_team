@@ -1,5 +1,0 @@
----
-#- import_tasks: prometheus.yml
-#- import_tasks: grafana.yml
-#- import_tasks: cleans.yml
-- import_tasks: test.yml

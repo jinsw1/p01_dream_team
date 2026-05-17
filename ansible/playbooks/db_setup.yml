@@ -1,7 +1,10 @@
 ---
 - name: "db setup"
   hosts: db
+  remote_user: adreamin
   become: yes
-
   roles:
-    - db_setup
+    - postgre_setup
+    - postgreExporter_setup
+    - nodeExporter_setup
+    # - cleans
